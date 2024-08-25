@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MusicBox</string>
+    <string name="cursor_error">An error occurred while accessing your Music List</string>
+
 </resources>
