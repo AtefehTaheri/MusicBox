@@ -1,10 +1,13 @@
 package ir.atefehtaheri.musicbox.feature.musiclist
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import ir.atefehtaheri.musicbox.R
 import ir.atefehtaheri.musicbox.data.musiclist.local.models.MusicDto
 import ir.atefehtaheri.musicbox.databinding.MusicItemBinding
 
@@ -17,9 +20,20 @@ class MusicListAdapter() :
 
         private val title = binding.title
         private val artist = binding.artist
+        private val duration = binding.duration
+        private val imageView = binding.imageView
+
         fun bind(musicDto: MusicDto) {
             title.text = musicDto.title
             artist.text = musicDto.artist
+            duration.text = musicDto.duration.toString()
+            val imageUri: Uri = Uri.parse(musicDto.image)
+
+            imageView.load(imageUri) {
+                crossfade(true)
+                placeholder(R.drawable.placeholder)
+                error(R.drawable.placeholder)
+            }
         }
     }
 

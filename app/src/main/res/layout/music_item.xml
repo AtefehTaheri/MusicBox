@@ -1,21 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_margin="7dp"
+    >
 
-  <TextView
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:text="Hello"
-      android:gravity="center"
-      android:id="@+id/title"/>
-
-    <TextView
+    <androidx.cardview.widget.CardView
+        android:id="@+id/CardView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="world"
-        android:gravity="center"
-        android:id="@+id/artist"/>
-</LinearLayout>
+        android:layout_height="0dp"
+        app:cardBackgroundColor="@color/design_default_color_on_primary"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp"
+        android:outlineSpotShadowColor="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="W,1:4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/card_padding">
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:layout_marginEnd="@dimen/image_margin_end"
+                app:layout_constraintEnd_toStartOf="@+id/info_container"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintWidth_percent="0.3"
+                android:contentDescription="@string/music_image_description" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/info_container"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/imageView">
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hello"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_scrim"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                     />
+
+                <TextView
+                    android:id="@+id/duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hello"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textColor="@color/md_theme_outline"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                    app:layout_constraintTop_toBottomOf="@id/title"
+                    app:layout_constraintStart_toStartOf="parent"
+                    />
+
+                <TextView
+                    android:id="@+id/artist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hello"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textColor="@color/md_theme_secondary"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                    app:layout_constraintTop_toBottomOf="@id/duration"
+                    app:layout_constraintStart_toStartOf="parent"
+                   />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

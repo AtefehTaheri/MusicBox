@@ -14,7 +14,7 @@ nav_version = "2.7.7"
 hilt = "2.48"
 ksp = "1.8.20-1.0.11"
 kapt = "1.9.0"
-
+coil = "2.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,7 +34,7 @@ navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 
-
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 
 
 [plugins]
