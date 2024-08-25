@@ -1,4 +1,4 @@
-package ir.atefehtaheri.musicbox.core.common.madels
+package ir.atefehtaheri.musicbox.core.common.models
 
 
 sealed class ResultStatus<out S>{

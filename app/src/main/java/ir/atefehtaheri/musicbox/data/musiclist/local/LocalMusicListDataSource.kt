@@ -2,84 +2,104 @@ package ir.atefehtaheri.musicbox.data.musiclist.local
 
 import android.content.ContentUris
 import android.content.Context
+import android.database.ContentObserver
+import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import ir.atefehtaheri.musicbox.R
-import ir.atefehtaheri.musicbox.core.common.madels.ResultStatus
+import ir.atefehtaheri.musicbox.core.common.models.ResultStatus
 import ir.atefehtaheri.musicbox.data.musiclist.local.models.MusicDto
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
-import kotlin.coroutines.cancellation.CancellationException
 
 class LocalMusicListDataSource @Inject constructor(
     @ApplicationContext private val context: Context,
     private val dispatcher: CoroutineDispatcher,
 ) : MusicListDataSource {
 
-    override suspend fun getLocalMusics(): ResultStatus<List<MusicDto>> {
-        val musicList = mutableListOf<MusicDto>()
+    private val projectionColumns = arrayOf(
+        MediaStore.Audio.Media._ID,
+        MediaStore.Audio.Media.TITLE,
+        MediaStore.Audio.Media.ARTIST,
+        MediaStore.Audio.Media.DURATION,
+        MediaStore.Audio.Media.ALBUM_ID,
+        MediaStore.Audio.Media.DATA
+    )
+    private val musicContentUri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
-        val projection = arrayOf(
-            MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.TITLE,
-            MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media.ALBUM_ID,
-            MediaStore.Audio.Media.DATA,
+    private fun getLocalMusics(): ResultStatus<List<MusicDto>> {
 
+        return try {
+            val cursor = context.contentResolver.query(
+                musicContentUri,
+                projectionColumns,
+                null,
+                null,
+                null
             )
-        return withContext(dispatcher) {
-            ensureActive()
+            getCursorData(cursor)
 
-            try {
-                val cursor = context.contentResolver.query(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    projection,
-                    null,
-                    null,
-                    null
-                )
-
-                cursor?.use {
-                    val idIndex = it.getColumnIndex(MediaStore.Audio.Media._ID)
-                    val titleIndex = it.getColumnIndex(MediaStore.Audio.Media.TITLE)
-                    val artistIndex = it.getColumnIndex(MediaStore.Audio.Media.ARTIST)
-                    val durationIndex = it.getColumnIndex(MediaStore.Audio.Media.DURATION)
-                    val albumIdIndex = it.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)
-                    val dataIndex = it.getColumnIndex(MediaStore.Audio.Media.DATA)
-
-                    while (it.moveToNext()) {
-                        val id = it.getLong(idIndex)
-                        val title = it.getString(titleIndex)
-                        val artist = it.getString(artistIndex)
-                        val duration = it.getLong(durationIndex)
-                        val albumId = it.getLong(albumIdIndex)
-                        val albumArtUri = getAlbumUri(context, albumId)
-                        val filePath = it.getString(dataIndex)
-
-                        musicList.add(
-                            MusicDto(id, title, artist, duration, albumArtUri?.toString(), filePath)
-                        )
-                    }
-                    ResultStatus.Success(musicList)
-
-                } ?: ResultStatus.Failure(context.getString(R.string.cursor_error))
-
-            } catch (e: Exception) {
-                if (e is CancellationException) {
-                    throw e
-                } else {
-                    ResultStatus.Failure(context.getString(R.string.cursor_error))
-                }
-            }
+        } catch (e: Exception) {
+            ResultStatus.Failure(context.getString(R.string.cursor_error))
         }
     }
 
-    private fun getAlbumUri(context: Context, albumId: Long): Uri {
+    private fun getCursorData(cursor: Cursor?): ResultStatus<List<MusicDto>> {
+        val musicList = mutableListOf<MusicDto>()
+        cursor?.use {
+            while (it.moveToNext()) {
+                musicList.add(it.asMusicDto())
+            }
+            return ResultStatus.Success(musicList)
+
+        } ?: return ResultStatus.Failure(context.getString(R.string.cursor_error))
+    }
+
+    private fun Cursor.asMusicDto(): MusicDto {
+
+        val id = getLong(getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
+        val title = getString(getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))
+        val artist = getString(getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
+        val duration = getLong(getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
+        val albumId = getLong(getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
+        val filePath = getString(getColumnIndexOrThrow(MediaStore.Audio.Media.DATA))
+        val albumArtUri = getAlbumUri(albumId)
+
+        return MusicDto(id, title, artist, duration, albumArtUri.toString(), filePath)
+    }
+
+
+    private fun getAlbumUri(albumId: Long): Uri {
         val albumArtUri = Uri.parse("content://media/external/audio/albumart")
         return ContentUris.withAppendedId(albumArtUri, albumId)
     }
+
+
+    override fun getLocalMusicsFlow(): Flow<ResultStatus<List<MusicDto>>> = callbackFlow {
+        val observer = object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                super.onChange(selfChange)
+                trySend(getLocalMusics())
+            }
+        }
+
+        context.contentResolver.registerContentObserver(musicContentUri, true, observer)
+
+        val initialMusic = getLocalMusics()
+        trySend(initialMusic)
+
+        awaitClose {
+            context.contentResolver.unregisterContentObserver(observer)
+        }
+    }.catch {
+        emit(ResultStatus.Failure(context.getString(R.string.cursor_error)))
+    }.flowOn(dispatcher)
+
+
 }

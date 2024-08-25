@@ -2,8 +2,9 @@ package ir.atefehtaheri.musicbox.data.musiclist.local
 
 import ir.atefehtaheri.musicbox.core.common.models.ResultStatus
 import ir.atefehtaheri.musicbox.data.musiclist.local.models.MusicDto
+import kotlinx.coroutines.flow.Flow
 
 interface MusicListDataSource {
 
-    suspend fun getLocalMusics(): ResultStatus<List<MusicDto>>
+     fun getLocalMusicsFlow(): Flow<ResultStatus<List<MusicDto>>>
 }
