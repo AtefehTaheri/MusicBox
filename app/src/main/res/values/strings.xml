@@ -9,6 +9,8 @@
     <string name="delete_success_message">Music file deleted successfully</string>
     <string name="permissionsDenied">This app needs access to your music files.Please grant the necessary permissions.</string>
     <string name="intentSenderDenied">Unable to delete the file. Please grant the required permission</string>
+    <string name="music_notfound">Music file not found</string>
+
 
 
 </resources>

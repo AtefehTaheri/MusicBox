@@ -58,6 +58,9 @@ class LocalMusicListDataSource @Inject constructor(
     private fun getCursorData(cursor: Cursor?): ResultStatus<List<MusicDto>> {
         val musicList = mutableListOf<MusicDto>()
         cursor?.use {
+            if(it.count == 0){
+                return ResultStatus.Failure(context.getString(R.string.music_notfound))
+            }
             while (it.moveToNext()) {
                 musicList.add(it.asMusicDto())
             }
