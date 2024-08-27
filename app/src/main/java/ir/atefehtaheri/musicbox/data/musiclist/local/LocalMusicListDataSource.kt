@@ -1,11 +1,16 @@
 package ir.atefehtaheri.musicbox.data.musiclist.local
 
+import android.app.Activity
+import android.app.RecoverableSecurityException
 import android.content.ContentUris
 import android.content.Context
+import android.content.IntentSender
 import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
+import androidx.core.app.ActivityCompat.startIntentSenderForResult
 import dagger.hilt.android.qualifiers.ApplicationContext
 import ir.atefehtaheri.musicbox.R
 import ir.atefehtaheri.musicbox.core.common.models.ResultStatus
@@ -101,5 +106,17 @@ class LocalMusicListDataSource @Inject constructor(
         emit(ResultStatus.Failure(context.getString(R.string.cursor_error)))
     }.flowOn(dispatcher)
 
+    override fun deleteMusic(idMusic: Long, handleException: (IntentSender) -> Unit){
 
+        try {
+            val uri=Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, idMusic.toString())
+            val z= context.contentResolver.delete(uri, null, null)
+        } catch (e: SecurityException) {
+            val recoverableSecurityException = e as? RecoverableSecurityException
+            val intentSender = recoverableSecurityException?.userAction?.actionIntent?.intentSender
+            intentSender?.let {
+                handleException(it)
+            }
+        }
+    }
 }

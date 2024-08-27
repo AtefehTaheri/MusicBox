@@ -1,11 +1,15 @@
 package ir.atefehtaheri.musicbox.feature.musiclist
 
+import android.Manifest
 import android.os.Build
 import android.os.Build.VERSION_CODES.TIRAMISU
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -13,12 +17,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
-import android.Manifest
-import android.widget.Toast
 import ir.atefehtaheri.musicbox.core.common.checkPermission
+import ir.atefehtaheri.musicbox.core.common.launchIntentSender
 import ir.atefehtaheri.musicbox.core.common.launchPermissionDialog
+import ir.atefehtaheri.musicbox.core.common.requestIntentSenderCallback
 import ir.atefehtaheri.musicbox.core.common.requestMultiPermissionCallback
 import ir.atefehtaheri.musicbox.databinding.FragmentMusiclistBinding
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -26,20 +31,39 @@ import kotlinx.coroutines.launch
 class MusicListFragment() : Fragment() {
 
     private val musicListViewModel: MusicListViewModel by viewModels()
-    lateinit var binding: FragmentMusiclistBinding
-    private val adapter = MusicListAdapter()
+    private lateinit var binding: FragmentMusiclistBinding
+    private lateinit var intentSenderCallback: ActivityResultLauncher<IntentSenderRequest>
+    private var id_deleteMusic: Long? = null
+
+    private val adapter = MusicListAdapter(
+        onDeleteClick = { idMusic ->
+            id_deleteMusic = idMusic
+            musicListViewModel.deleteMusic(idMusic) { intentSender ->
+                launchIntentSender(
+                    intentSender,
+                    intentSenderCallback
+                )
+            }
+        },
+        onPlayClick = {}
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         return FragmentMusiclistBinding.inflate(inflater, container, false).root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentMusiclistBinding.bind(view)
+        intentSenderCallback = this.requestIntentSenderCallback(
+            onGranted = { musicListViewModel.deleteMusic(id_deleteMusic!!, {}) },
+            onDenied = ::showToast,
+            requireContext()
+        )
 
         val isPermissionsDenied = getPermissionsList().map {
             checkPermission(requireContext(), it)
@@ -47,21 +71,16 @@ class MusicListFragment() : Fragment() {
 
         if (isPermissionsDenied) {
             launchPermissionDialog(
-                this.requestMultiPermissionCallback(::showListView, ::showError),
+                this.requestMultiPermissionCallback(
+                    ::showListView,
+                    ::showToast,
+                    requireContext()
+                ),
                 getPermissionsList().toTypedArray()
             )
         } else {
             showListView()
         }
-
-    }
-
-    private fun showError() {
-        Toast.makeText(
-            requireContext(),
-            "This app needs access to your music files.\nPlease grant the necessary permissions.",
-            Toast.LENGTH_SHORT
-        ).show()
     }
 
 
@@ -109,5 +128,13 @@ class MusicListFragment() : Fragment() {
             permissionsList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
         return permissionsList
+    }
+
+    private fun showToast(statusMessage: String) {
+        Toast.makeText(
+            requireContext(),
+            statusMessage,
+            Toast.LENGTH_SHORT
+        ).show()
     }
 }
