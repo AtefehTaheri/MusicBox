@@ -4,17 +4,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="7dp"
-    >
+    android:layout_margin="7dp">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/CardView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:outlineSpotShadowColor="@android:color/transparent"
         app:cardBackgroundColor="@color/design_default_color_on_primary"
         app:cardCornerRadius="20dp"
         app:cardElevation="8dp"
-        android:outlineSpotShadowColor="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="W,1:4"
         app:layout_constraintEnd_toEndOf="parent"
@@ -30,61 +29,83 @@
                 android:id="@+id/imageView"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
                 android:layout_marginEnd="@dimen/image_margin_end"
+                android:contentDescription="@string/music_image_description"
+                android:scaleType="centerCrop"
                 app:layout_constraintEnd_toStartOf="@+id/info_container"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintWidth_percent="0.3"
-                android:contentDescription="@string/music_image_description" />
+                app:layout_constraintWidth_percent="0.3" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/info_container"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/moreOption"
                 app:layout_constraintStart_toEndOf="@+id/imageView">
 
                 <TextView
                     android:id="@+id/title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Hello"
-                    android:maxLines="1"
                     android:ellipsize="end"
-                    android:textStyle="bold"
-                    android:textColor="@color/md_theme_scrim"
+                    android:maxLines="1"
+                    android:text="Hello"
                     android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-                    app:layout_constraintTop_toTopOf="parent"
+                    android:textColor="@color/md_theme_scrim"
+                    android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
-                     />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/duration"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Hello"
-                    android:maxLines="1"
                     android:ellipsize="end"
-                    android:textColor="@color/md_theme_outline"
+                    android:maxLines="1"
+                    android:text="Hello"
                     android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
-                    app:layout_constraintTop_toBottomOf="@id/title"
+                    android:textColor="@color/md_theme_outline"
                     app:layout_constraintStart_toStartOf="parent"
-                    />
+                    app:layout_constraintTop_toBottomOf="@id/title" />
 
                 <TextView
                     android:id="@+id/artist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Hello"
-                    android:maxLines="1"
                     android:ellipsize="end"
-                    android:textColor="@color/md_theme_secondary"
+                    android:maxLines="1"
+                    android:text="Hello"
                     android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                    app:layout_constraintTop_toBottomOf="@id/duration"
+                    android:textColor="@color/md_theme_secondary"
                     app:layout_constraintStart_toStartOf="parent"
-                   />
+                    app:layout_constraintTop_toBottomOf="@id/duration" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <ImageButton
+                android:id="@+id/moreOption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/more_option"
+                android:src="@drawable/round_more_horiz_24"
+                app:layout_constraintBottom_toTopOf="@id/play"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:layout_constraintStart_toEndOf="@+id/info_container"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <ImageButton
+                android:id="@+id/play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/play"
+                android:src="@drawable/baseline_play_arrow_24"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/info_container"
+                app:layout_constraintTop_toBottomOf="@+id/moreOption" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
