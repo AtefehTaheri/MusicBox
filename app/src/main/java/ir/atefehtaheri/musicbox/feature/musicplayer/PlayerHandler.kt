@@ -35,6 +35,7 @@ class PlayerHandler @Inject constructor(
                 mediaController = null
             }
         }, ContextCompat.getMainExecutor(context))
+        
     }
 
     @OptIn(UnstableApi::class)
