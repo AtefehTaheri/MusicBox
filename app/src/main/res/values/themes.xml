@@ -61,5 +61,8 @@
         <item name="android:lineHeight">20sp</item>
         <item name="android:letterSpacing">0.2</item>
     </style>
-
+    <style name="ShapeAppearance_circular" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>
