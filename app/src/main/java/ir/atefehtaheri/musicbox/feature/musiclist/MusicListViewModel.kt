@@ -35,11 +35,20 @@ class MusicListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(MusicListUiState())
     val uiState = _uiState.asStateFlow()
 
+    val mediaController = playerHandler.mediaController
+
 
     init {
-        playerHandler.addListenerToMediaController(
+        playerHandler.addListenerToMediaControllerFuture(
             onSuccess = ::loadData
         )
+        viewModelScope.launch {
+            playerHandler.currentMusic.collectLatest { currentMusic ->
+                _uiState.update {
+                    it.copy(currentMusic = currentMusic)
+                }
+            }
+        }
     }
 
 

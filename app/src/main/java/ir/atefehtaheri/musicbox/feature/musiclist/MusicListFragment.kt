@@ -21,6 +21,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaController
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,6 +35,7 @@ import ir.atefehtaheri.musicbox.data.musiclist.local.models.MusicDto
 import ir.atefehtaheri.musicbox.databinding.FragmentMusiclistBinding
 import ir.atefehtaheri.musicbox.feature.musiclist.uistate.MusicListUiState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,8 +43,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MusicListFragment() : Fragment() {
 
-    @Inject
-    lateinit var player: ExoPlayer
+    //    @Inject
+    private var mediaController: MediaController?=null
     private val musicListViewModel: MusicListViewModel by viewModels()
     private lateinit var binding: FragmentMusiclistBinding
     private lateinit var intentSenderCallback: ActivityResultLauncher<IntentSenderRequest>
@@ -77,7 +79,14 @@ class MusicListFragment() : Fragment() {
         binding = FragmentMusiclistBinding.bind(view)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.mediaControls.player = player
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                musicListViewModel.mediaController.collectLatest {
+                     mediaController= it
+                    binding.mediaControls.player=it
+                }
+            }
+        }
 
         checkPermissions()
 
@@ -117,51 +126,57 @@ class MusicListFragment() : Fragment() {
         if (isPermissionsDenied) {
             launchPermissionDialog(
                 this.requestMultiPermissionCallback(
-                    permissionsGranted = ::showListView,
+                    permissionsGranted = ::showHomeScreen,
                     permissionsDenied = ::showToast,
                     context = requireContext()
                 ),
                 getPermissionsList().toTypedArray()
             )
         } else {
-            showListView()
+            showHomeScreen()
         }
     }
 
-    private fun showListView() {
+    private fun showHomeScreen() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 musicListViewModel.uiState.collect {
                     when {
-                        it.isLoading -> {
-                            binding.progressBar.visibility = View.VISIBLE
-                            binding.recyclerView.visibility = View.GONE
-                            binding.errorTextView.visibility = View.GONE
-                            binding.playerCardview.visibility = View.GONE
-                        }
+                        it.isLoading -> loadingView()
 
-                        it.errorMessage != null -> {
-                            binding.progressBar.visibility = View.GONE
-                            binding.recyclerView.visibility = View.GONE
-                            binding.playerCardview.visibility = View.GONE
-                            binding.errorTextView.visibility = View.VISIBLE
-                            binding.errorTextView.text = it.errorMessage
-                        }
+                        it.errorMessage != null -> errorView(it.errorMessage)
 
-                        else -> {
-                            binding.progressBar.visibility = View.GONE
-                            binding.recyclerView.visibility = View.VISIBLE
-                            binding.errorTextView.visibility = View.GONE
-                            adapter.submitList(it.musicList)
-                            if (it.currentMusic != null) {
-                                showPlayBar(it.currentMusic)
-                            }
-
-                        }
+                        else -> showListView(it.musicList,it.currentMusic)
                     }
                 }
             }
+        }
+    }
+
+    private fun loadingView(){
+        binding.progressBar.visibility = View.VISIBLE
+        binding.recyclerView.visibility = View.GONE
+        binding.errorTextView.visibility = View.GONE
+        binding.playerCardview.visibility = View.GONE
+
+    }
+    private fun errorView(errorMessage:String){
+        binding.progressBar.visibility = View.GONE
+        binding.recyclerView.visibility = View.GONE
+        binding.playerCardview.visibility = View.GONE
+        binding.errorTextView.visibility = View.VISIBLE
+        binding.errorTextView.text = errorMessage
+
+
+    }
+    private fun showListView(musicList:List<MusicDto>,currentMusic:MusicDto?){
+        binding.progressBar.visibility = View.GONE
+        binding.recyclerView.visibility = View.VISIBLE
+        binding.errorTextView.visibility = View.GONE
+        adapter.submitList(musicList)
+        if (currentMusic != null) {
+            showPlayBar(currentMusic)
         }
     }
 

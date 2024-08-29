@@ -6,11 +6,15 @@ import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import com.google.common.util.concurrent.ListenableFuture
 import dagger.hilt.android.qualifiers.ApplicationContext
 import ir.atefehtaheri.musicbox.data.musiclist.local.models.MusicDto
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 class PlayerHandler @Inject constructor(
@@ -18,24 +22,49 @@ class PlayerHandler @Inject constructor(
     private val mediaControllerFuture: ListenableFuture<MediaController>,
 ) {
 
+    private val _mediaController: MutableStateFlow<MediaController?> = MutableStateFlow(null)
+    val mediaController = _mediaController.asStateFlow()
 
 
-    private var mediaController: MediaController? = null
+    private val _currentMusic: MutableStateFlow<MusicDto?> = MutableStateFlow(null)
+    val currentMusic = _currentMusic.asStateFlow()
+
+    fun addListenerToMediaController() {
+        _mediaController.value?.addListener(object : Player.Listener {
+            @OptIn(UnstableApi::class)
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                mediaItem?.let {
+                    _currentMusic.update {
+
+                        with(mediaItem) {
+                            MusicDto(
+                                mediaId.toLong(),
+                                mediaMetadata.displayTitle.toString(),
+                                mediaMetadata.artist.toString(),
+                                mediaMetadata.durationMs ?: 0L,
+                                mediaMetadata.artworkUri.toString(),
+                                localConfiguration?.uri.toString()
+                            )
+                        }
+                    }
+                }
+            }
+        })
+    }
 
 
-    fun addListenerToMediaController(
+    fun addListenerToMediaControllerFuture(
         onSuccess: () -> Unit,
     ) {
         mediaControllerFuture.addListener({
             try {
-                mediaController = mediaControllerFuture.get()
+                _mediaController.update { mediaControllerFuture.get() }
                 onSuccess()
-
+                addListenerToMediaController()
             } catch (e: Exception) {
-                mediaController = null
+                _mediaController.update { null }
             }
         }, ContextCompat.getMainExecutor(context))
-        
     }
 
     @OptIn(UnstableApi::class)
@@ -43,11 +72,10 @@ class PlayerHandler @Inject constructor(
         val mediaItems = musicList.map { music ->
             MediaItem.Builder()
                 .setUri(music.filepath)
+                .setMediaId(music.id.toString())
                 .setMediaMetadata(
                     MediaMetadata.Builder()
-                        .setTitle(music.title)
-                        .setAlbumTitle(music.title)
-                        .setAlbumArtist(music.artist)
+                        .setArtist(music.artist)
                         .setDisplayTitle(music.title)
                         .setDurationMs(music.duration)
                         .setArtworkUri(Uri.parse(music.image))
@@ -55,32 +83,31 @@ class PlayerHandler @Inject constructor(
                 )
                 .build()
         }
-        mediaController?.setMediaItems(mediaItems)
-        mediaController?.prepare()
-        mediaController?.playWhenReady = false
+        mediaController.value?.setMediaItems(mediaItems)
+        mediaController.value?.prepare()
     }
 
 
     fun onMusicItemClick(index: Int) {
         when (index) {
-            mediaController?.currentMediaItemIndex -> {
+            mediaController.value?.currentMediaItemIndex -> {
                 playOrPause()
             }
 
             else -> {
-                mediaController?.seekToDefaultPosition(index)
-                mediaController?.prepare()
-                mediaController?.playWhenReady = true
+                mediaController.value?.seekToDefaultPosition(index)
+                mediaController.value?.prepare()
+                mediaController.value?.playWhenReady = true
 
             }
         }
     }
 
     private fun playOrPause() {
-        if (mediaController!!.isPlaying) {
-            mediaController!!.pause()
+        if (mediaController.value!!.isPlaying) {
+            mediaController.value!!.pause()
         } else {
-            mediaController!!.play()
+            mediaController.value!!.play()
         }
     }
 
