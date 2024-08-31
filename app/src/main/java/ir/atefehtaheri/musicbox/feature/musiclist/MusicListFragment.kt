@@ -12,6 +12,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +23,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import dagger.hilt.android.AndroidEntryPoint
@@ -43,9 +45,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MusicListFragment() : Fragment() {
 
-    //    @Inject
     private var mediaController: MediaController?=null
-    private val musicListViewModel: MusicListViewModel by viewModels()
+    private val musicListViewModel: MusicListViewModel by activityViewModels()
     private lateinit var binding: FragmentMusiclistBinding
     private lateinit var intentSenderCallback: ActivityResultLauncher<IntentSenderRequest>
     private var id_deleteMusic: Long? = null
@@ -182,6 +183,11 @@ class MusicListFragment() : Fragment() {
 
     private fun showPlayBar(currentMusic: MusicDto) {
         binding.playerCardview.visibility = View.VISIBLE
+        binding.playerCardview.setOnClickListener {
+            findNavController().navigate(R.id.action_musicListFragment_to_detailMusicFragment)
+        }
+
+
         val currentMusicTitle = binding.exoTitle
         val currentMusicArtWork = binding.exoArtwork
         currentMusicTitle.setText(currentMusic.title)

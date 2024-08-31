@@ -8,5 +8,16 @@
         android:id="@+id/musicListFragment"
         android:name="ir.atefehtaheri.musicbox.feature.musiclist.MusicListFragment"
         android:label="MusicListFragment"
-        tools:layout="@layout/fragment_musiclist"/>
+        tools:layout="@layout/fragment_musiclist">
+        <action
+            android:id="@+id/action_musicListFragment_to_detailMusicFragment"
+            app:destination="@id/detailMusicFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_right"
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/detailMusicFragment"
+        android:name="ir.atefehtaheri.musicbox.feature.detailmusic.DetailMusicFragment"
+        android:label="DetailMusicFragment" />
 </navigation>
