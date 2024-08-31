@@ -18,13 +18,17 @@ class MusicService : MediaSessionService() {
     ): MediaSession = mediaSession
 
 
-    override fun onDestroy() {
-        super.onDestroy()
-        mediaSession.apply {
-            release()
-            if (player.playbackState != Player.STATE_IDLE) {
-                player.stop()
-            }
-        }
-    }
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        mediaSession.apply {
+//            release()
+//            if (player.playbackState != Player.STATE_IDLE) {
+//                player.seekTo(0)
+//                player.playWhenReady = false
+//                player.stop()
+//                player.release()
+//            }
+//            player.release()
+//        }
+//    }
 }

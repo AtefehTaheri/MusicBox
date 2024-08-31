@@ -29,6 +29,14 @@ class PlayerHandler @Inject constructor(
     private val _currentMusic: MutableStateFlow<MusicDto?> = MutableStateFlow(null)
     val currentMusic = _currentMusic.asStateFlow()
 
+
+    val currentMediaItem: MediaItem?
+        get() = _mediaController.value?.currentMediaItem
+
+    val currentPosition: Long?
+        get() = _mediaController.value?.currentPosition
+
+
     fun addListenerToMediaController() {
         _mediaController.value?.addListener(object : Player.Listener {
             @OptIn(UnstableApi::class)
@@ -36,16 +44,7 @@ class PlayerHandler @Inject constructor(
                 mediaItem?.let {
                     _currentMusic.update {
 
-                        with(mediaItem) {
-                            MusicDto(
-                                mediaId.toLong(),
-                                mediaMetadata.displayTitle.toString(),
-                                mediaMetadata.artist.toString(),
-                                mediaMetadata.durationMs ?: 0L,
-                                mediaMetadata.artworkUri.toString(),
-                                localConfiguration?.uri.toString()
-                            )
-                        }
+                        mediaItem.asMusicDto()
                     }
                 }
             }
@@ -70,37 +69,33 @@ class PlayerHandler @Inject constructor(
     @OptIn(UnstableApi::class)
     fun setMediaItems(musicList: List<MusicDto>) {
         val mediaItems = musicList.map { music ->
-            MediaItem.Builder()
-                .setUri(music.filepath)
-                .setMediaId(music.id.toString())
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setArtist(music.artist)
-                        .setDisplayTitle(music.title)
-                        .setDurationMs(music.duration)
-                        .setArtworkUri(Uri.parse(music.image))
-                        .build()
-                )
-                .build()
+            music.asMediaItem()
         }
         mediaController.value?.setMediaItems(mediaItems)
         mediaController.value?.prepare()
     }
 
+    fun seekTo(currentIndex: Int, currentPosition: Long) {
+        mediaController.value?.seekTo(currentIndex, currentPosition)
+    }
+
 
     fun onMusicItemClick(index: Int) {
+
         when (index) {
             mediaController.value?.currentMediaItemIndex -> {
                 playOrPause()
             }
-
             else -> {
                 mediaController.value?.seekToDefaultPosition(index)
                 mediaController.value?.prepare()
                 mediaController.value?.playWhenReady = true
-
             }
         }
+    }
+
+    fun onDeleteItemClick(positionItem: Int) {
+        mediaController.value?.removeMediaItem(positionItem)
     }
 
     private fun playOrPause() {
@@ -111,9 +106,35 @@ class PlayerHandler @Inject constructor(
         }
     }
 
-
 }
 
+@OptIn(UnstableApi::class)
+fun MediaItem.asMusicDto(): MusicDto {
+    return MusicDto(
+        mediaId.toLong(),
+        mediaMetadata.displayTitle.toString(),
+        mediaMetadata.artist.toString(),
+        mediaMetadata.durationMs ?: 0L,
+        mediaMetadata.artworkUri.toString(),
+        localConfiguration?.uri.toString()
+    )
+}
+
+@OptIn(UnstableApi::class)
+fun MusicDto.asMediaItem(): MediaItem {
+    return MediaItem.Builder()
+        .setUri(this.filepath)
+        .setMediaId(this.id.toString())
+        .setMediaMetadata(
+            MediaMetadata.Builder()
+                .setArtist(this.artist)
+                .setDisplayTitle(this.title)
+                .setDurationMs(this.duration)
+                .setArtworkUri(Uri.parse(this.image))
+                .build()
+        )
+        .build()
+}
 
 
 

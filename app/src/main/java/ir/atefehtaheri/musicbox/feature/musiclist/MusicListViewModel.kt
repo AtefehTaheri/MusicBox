@@ -1,28 +1,19 @@
 package ir.atefehtaheri.musicbox.feature.musiclist
 
-import android.content.Context
 import android.content.IntentSender
-import android.net.Uri
-import androidx.annotation.OptIn
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.session.MediaController
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import ir.atefehtaheri.musicbox.core.common.models.ResultStatus
 import ir.atefehtaheri.musicbox.data.musiclist.repository.MusicListRepository
 import ir.atefehtaheri.musicbox.feature.musiclist.uistate.MusicListUiState
 import ir.atefehtaheri.musicbox.feature.musicplayer.PlayerHandler
-import kotlinx.coroutines.Dispatchers
+import ir.atefehtaheri.musicbox.feature.musicplayer.asMusicDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -37,7 +28,6 @@ class MusicListViewModel @Inject constructor(
 
     val mediaController = playerHandler.mediaController
 
-
     init {
         playerHandler.addListenerToMediaControllerFuture(
             onSuccess = ::loadData
@@ -50,7 +40,6 @@ class MusicListViewModel @Inject constructor(
             }
         }
     }
-
 
     private fun loadData() {
         viewModelScope.launch {
@@ -74,15 +63,22 @@ class MusicListViewModel @Inject constructor(
                                     musicList = result.data ?: emptyList()
                                 )
                             }
+                            setMediaItems()
                         }
                     }
-                    setMediaItems()
                 }
         }
     }
 
     private fun setMediaItems() {
+
+        val currentPosition = playerHandler.currentPosition
+        val currentMusicDto = playerHandler.currentMediaItem?.asMusicDto()
+        val index = _uiState.value.musicList.indexOf(currentMusicDto)
         playerHandler.setMediaItems(_uiState.value.musicList)
+        if (index != -1){
+            playerHandler.seekTo(index,currentPosition!!)
+        }
     }
 
 
@@ -96,9 +92,15 @@ class MusicListViewModel @Inject constructor(
     }
 
 
-    fun deleteMusic(idMusic: Long, handleException: (IntentSender) -> Unit) {
+    fun deleteMusicFile(idMusic: Long, handleException: (IntentSender) -> Unit) {
         musicListRepository.deleteMusic(idMusic, handleException)
     }
+
+
+//    override fun onCleared() {
+//        super.onCleared()
+//        mediaController.value?.release()
+//    }
 
 }
 

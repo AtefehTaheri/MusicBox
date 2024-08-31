@@ -45,7 +45,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MusicListFragment() : Fragment() {
 
-    private var mediaController: MediaController?=null
+    private var mediaController: MediaController? = null
     private val musicListViewModel: MusicListViewModel by activityViewModels()
     private lateinit var binding: FragmentMusiclistBinding
     private lateinit var intentSenderCallback: ActivityResultLauncher<IntentSenderRequest>
@@ -54,7 +54,7 @@ class MusicListFragment() : Fragment() {
     private val adapter = MusicListAdapter(
         onDeleteClick = { idMusic ->
             id_deleteMusic = idMusic
-            musicListViewModel.deleteMusic(idMusic) { intentSender ->
+            musicListViewModel.deleteMusicFile(idMusic) { intentSender ->
                 launchIntentSender(
                     intentSender,
                     intentSenderCallback
@@ -83,40 +83,19 @@ class MusicListFragment() : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 musicListViewModel.mediaController.collectLatest {
-                     mediaController= it
-                    binding.mediaControls.player=it
+                    mediaController = it
+                    binding.mediaControls.player = it
                 }
             }
         }
-
         checkPermissions()
-
-
-//        val currentMusicTitle = binding.exoTitle
-//        val currentMusicArtWork = binding.exoArtwork
-//
-//
-//        player.addListener(object : Player.Listener {
-//            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-//                mediaItem?.let {
-//                    if (mediaItem.mediaMetadata.title != null) {
-//                        val title = mediaItem.mediaMetadata.displayTitle
-//                        val image = mediaItem.mediaMetadata.artworkUri
-//                        currentMusicTitle.setText(title)
-//                        currentMusicArtWork.load(image)
-//                    } else {
-//                        currentMusicTitle.setText("Unknown Title")
-//                    }
-//                }
-//            }
-//        })
-
-
     }
 
     private fun checkPermissions() {
         intentSenderCallback = this.requestIntentSenderCallback(
-            onGranted = { musicListViewModel.deleteMusic(id_deleteMusic!!, {}) },
+            onGranted = {
+                musicListViewModel.deleteMusicFile(id_deleteMusic!!, {})
+            },
             onDenied = ::showToast,
             requireContext()
         )
@@ -139,7 +118,6 @@ class MusicListFragment() : Fragment() {
     }
 
     private fun showHomeScreen() {
-
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 musicListViewModel.uiState.collect {
@@ -148,21 +126,22 @@ class MusicListFragment() : Fragment() {
 
                         it.errorMessage != null -> errorView(it.errorMessage)
 
-                        else -> showListView(it.musicList,it.currentMusic)
+                        else -> showListView(it.musicList, it.currentMusic)
                     }
                 }
             }
         }
     }
 
-    private fun loadingView(){
+    private fun loadingView() {
         binding.progressBar.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
         binding.errorTextView.visibility = View.GONE
         binding.playerCardview.visibility = View.GONE
 
     }
-    private fun errorView(errorMessage:String){
+
+    private fun errorView(errorMessage: String) {
         binding.progressBar.visibility = View.GONE
         binding.recyclerView.visibility = View.GONE
         binding.playerCardview.visibility = View.GONE
@@ -171,7 +150,8 @@ class MusicListFragment() : Fragment() {
 
 
     }
-    private fun showListView(musicList:List<MusicDto>,currentMusic:MusicDto?){
+
+    private fun showListView(musicList: List<MusicDto>, currentMusic: MusicDto?) {
         binding.progressBar.visibility = View.GONE
         binding.recyclerView.visibility = View.VISIBLE
         binding.errorTextView.visibility = View.GONE
@@ -186,7 +166,6 @@ class MusicListFragment() : Fragment() {
         binding.playerCardview.setOnClickListener {
             findNavController().navigate(R.id.action_musicListFragment_to_detailMusicFragment)
         }
-
 
         val currentMusicTitle = binding.exoTitle
         val currentMusicArtWork = binding.exoArtwork
@@ -217,4 +196,9 @@ class MusicListFragment() : Fragment() {
             Toast.LENGTH_SHORT
         ).show()
     }
+//
+//    override fun onDestroyView() {
+//        super.onDestroyView()
+//        mediaController?.release()
+//    }
 }
