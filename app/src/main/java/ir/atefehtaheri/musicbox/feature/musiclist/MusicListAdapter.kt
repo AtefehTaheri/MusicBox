@@ -97,7 +97,6 @@ private fun showPopupMenu(
                 onDeleteClick(musicDto.id)
                 true
             }
-
             else -> false
         }
     }

@@ -103,6 +103,7 @@
                 android:paddingVertical="@dimen/padding_7dp"
                 android:maxLines="1"
                 android:text=""
+                android:textColor="@color/md_theme_scrim"
                 app:layout_constraintBottom_toTopOf="@+id/media_controls"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/media_controls"

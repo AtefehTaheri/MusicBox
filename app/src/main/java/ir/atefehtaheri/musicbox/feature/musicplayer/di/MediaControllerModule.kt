@@ -18,7 +18,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object MediaControllerModule {
 
-//    @Singleton
     @Provides
     fun getMediaControllerModule(
         @ApplicationContext context: Context,
@@ -27,5 +26,4 @@ object MediaControllerModule {
         val sessionToken = SessionToken(context, ComponentName(context, MusicService::class.java))
         return MediaController.Builder(context, sessionToken).buildAsync()
     }
-
 }

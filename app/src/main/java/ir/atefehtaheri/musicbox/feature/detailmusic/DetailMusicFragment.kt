@@ -14,7 +14,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.viewpager2.widget.ViewPager2
 import ir.atefehtaheri.musicbox.databinding.FragmentDetailmusicBinding
-import ir.atefehtaheri.musicbox.feature.musiclist.MusicListViewModel
+import ir.atefehtaheri.musicbox.feature.musicshared.MusicListViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -28,7 +28,7 @@ class DetailMusicFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         return FragmentDetailmusicBinding.inflate(inflater, container, false).root
     }
 
@@ -37,9 +37,7 @@ class DetailMusicFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentDetailmusicBinding.bind(view)
         binding.viewPager.adapter = adapter
-
         binding.viewPager.setPageTransformer(ZoomOutPageTransformer())
-
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
@@ -71,12 +69,10 @@ class DetailMusicFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 musicListViewModel.uiState.collect {
                     adapter.submitList(it.musicList)
-                    val positionToScroll = mediaController?.currentMediaItemIndex
-                    val p = positionToScroll ?: 0
-                    binding.viewPager.setCurrentItem(p, false)
+                    val positionToScroll = mediaController!!.currentMediaItemIndex
+                    binding.viewPager.setCurrentItem(positionToScroll, false)
                 }
             }
         }
     }
-
 }

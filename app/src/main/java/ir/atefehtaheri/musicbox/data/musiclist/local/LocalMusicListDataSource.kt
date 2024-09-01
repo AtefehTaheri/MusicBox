@@ -1,6 +1,5 @@
 package ir.atefehtaheri.musicbox.data.musiclist.local
 
-import android.app.Activity
 import android.app.RecoverableSecurityException
 import android.content.ContentUris
 import android.content.Context
@@ -8,9 +7,7 @@ import android.content.IntentSender
 import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
-import androidx.core.app.ActivityCompat.startIntentSenderForResult
 import dagger.hilt.android.qualifiers.ApplicationContext
 import ir.atefehtaheri.musicbox.R
 import ir.atefehtaheri.musicbox.core.common.models.ResultStatus
@@ -19,7 +16,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
@@ -37,14 +33,13 @@ class LocalMusicListDataSource @Inject constructor(
         MediaStore.Audio.Media.DATA
     )
     private val musicContentUri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-
+    private val selection = "${MediaStore.Audio.Media.IS_MUSIC} == 1"
     private fun getLocalMusics(): ResultStatus<List<MusicDto>> {
-
         return try {
             val cursor = context.contentResolver.query(
                 musicContentUri,
                 projectionColumns,
-                null,
+                selection,
                 null,
                 null
             )
@@ -58,7 +53,7 @@ class LocalMusicListDataSource @Inject constructor(
     private fun getCursorData(cursor: Cursor?): ResultStatus<List<MusicDto>> {
         val musicList = mutableListOf<MusicDto>()
         cursor?.use {
-            if(it.count == 0){
+            if (it.count == 0) {
                 return ResultStatus.Failure(context.getString(R.string.music_notfound))
             }
             while (it.moveToNext()) {
@@ -84,7 +79,7 @@ class LocalMusicListDataSource @Inject constructor(
 
 
     private fun getAlbumUri(albumId: Long): Uri {
-        val albumArtUri = Uri.parse("content://media/external/audio/albumart")
+        val albumArtUri = Uri.parse(context.getString(R.string.albumart_uri))
         return ContentUris.withAppendedId(albumArtUri, albumId)
     }
 
@@ -105,15 +100,16 @@ class LocalMusicListDataSource @Inject constructor(
         awaitClose {
             context.contentResolver.unregisterContentObserver(observer)
         }
-    }.catch {
-        emit(ResultStatus.Failure(context.getString(R.string.cursor_error)))
     }.flowOn(dispatcher)
 
-    override fun deleteMusic(idMusic: Long, handleException: (IntentSender) -> Unit){
+    override fun deleteMusic(idMusic: Long, handleException: (IntentSender) -> Unit) {
 
         try {
-            val uri=Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, idMusic.toString())
-            val z= context.contentResolver.delete(uri, null, null)
+            val uri = ContentUris.withAppendedId(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                idMusic
+            )
+            context.contentResolver.delete(uri, null, null)
         } catch (e: SecurityException) {
             val recoverableSecurityException = e as? RecoverableSecurityException
             val intentSender = recoverableSecurityException?.userAction?.actionIntent?.intentSender

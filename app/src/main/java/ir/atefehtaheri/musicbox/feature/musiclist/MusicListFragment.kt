@@ -30,6 +30,7 @@ import ir.atefehtaheri.musicbox.core.common.requestIntentSenderCallback
 import ir.atefehtaheri.musicbox.core.common.requestMultiPermissionCallback
 import ir.atefehtaheri.musicbox.data.musiclist.local.models.MusicDto
 import ir.atefehtaheri.musicbox.databinding.FragmentMusiclistBinding
+import ir.atefehtaheri.musicbox.feature.musicshared.MusicListViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -109,6 +110,20 @@ class MusicListFragment() : Fragment() {
         }
     }
 
+
+
+    private fun getPermissionsList(): List<String> {
+
+        val permissionsList: MutableList<String> = mutableListOf()
+        if (Build.VERSION.SDK_INT >= TIRAMISU) {
+            permissionsList.add(Manifest.permission.READ_MEDIA_AUDIO)
+        } else {
+            permissionsList.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            permissionsList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+        return permissionsList
+    }
+
     private fun showHomeScreen() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -169,17 +184,6 @@ class MusicListFragment() : Fragment() {
         }
     }
 
-    private fun getPermissionsList(): List<String> {
-
-        val permissionsList: MutableList<String> = mutableListOf()
-        if (Build.VERSION.SDK_INT >= TIRAMISU) {
-            permissionsList.add(Manifest.permission.READ_MEDIA_AUDIO)
-        } else {
-            permissionsList.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-            permissionsList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
-        return permissionsList
-    }
 
     private fun showToast(statusMessage: String) {
         Toast.makeText(

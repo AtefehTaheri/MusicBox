@@ -1,17 +1,18 @@
 package ir.atefehtaheri.musicbox.feature.musicplayer
 
 import android.content.Context
-import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
 import dagger.hilt.android.qualifiers.ApplicationContext
 import ir.atefehtaheri.musicbox.data.musiclist.local.models.MusicDto
+import ir.atefehtaheri.musicbox.feature.musicplayer.model.asMediaItem
+import ir.atefehtaheri.musicbox.feature.musicplayer.model.asMusicDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -25,18 +26,11 @@ class PlayerHandler @Inject constructor(
     private val _mediaController: MutableStateFlow<MediaController?> = MutableStateFlow(null)
     val mediaController = _mediaController.asStateFlow()
 
-
     private val _currentMusic: MutableStateFlow<MusicDto?> = MutableStateFlow(null)
     val currentMusic = _currentMusic.asStateFlow()
 
 
-    val currentMediaItem: MediaItem?
-        get() = _mediaController.value?.currentMediaItem
-
-    val currentPosition: Long?
-        get() = _mediaController.value?.currentPosition
-
-
+    @OptIn(UnstableApi::class)
     fun addListenerToMediaController() {
         _mediaController.value?.addListener(object : Player.Listener {
             @OptIn(UnstableApi::class)
@@ -51,55 +45,63 @@ class PlayerHandler @Inject constructor(
     }
 
 
-    fun addListenerToMediaControllerFuture(
-        onSuccess: () -> Unit,
-    ) {
+    fun addListenerToMediaControllerFuture() {
         mediaControllerFuture.addListener({
             try {
-                _mediaController.update { mediaControllerFuture.get() }
-                onSuccess()
+                _mediaController.update {
+                    mediaControllerFuture.get()
+                }
                 addListenerToMediaController()
             } catch (e: Exception) {
                 _mediaController.update { null }
             }
-        }, ContextCompat.getMainExecutor(context))
+        },
+            MoreExecutors.directExecutor()
+        )
     }
 
-    @OptIn(UnstableApi::class)
+
     fun setMediaItems(musicList: List<MusicDto>) {
+
         val mediaItems = musicList.map { music ->
             music.asMediaItem()
         }
-        mediaController.value?.setMediaItems(mediaItems)
-        mediaController.value?.prepare()
+        _mediaController.value?.setMediaItems(mediaItems)
+        _currentMusic.update {
+            _mediaController.value?.currentMediaItem?.asMusicDto()
+        }
+
     }
 
-    fun seekTo(currentIndex: Int, currentPosition: Long) {
-        mediaController.value?.seekTo(currentIndex, currentPosition)
+    fun seekTo(currentMusicDto:MusicDto?,currentIndex: Int, currentPosition: Long) {
+        _mediaController.value?.seekTo(currentIndex, currentPosition)
+        _currentMusic.update {
+            currentMusicDto
+        }
     }
 
 
     fun onMusicItemClick(index: Int) {
 
         when (index) {
-            mediaController.value?.currentMediaItemIndex -> {
+            _mediaController.value?.currentMediaItemIndex -> {
                 playOrPause()
             }
 
             else -> {
-                mediaController.value?.seekToDefaultPosition(index)
-                mediaController.value?.prepare()
-                mediaController.value?.playWhenReady = true
+                _mediaController.value?.seekToDefaultPosition(index)
+                _mediaController.value?.prepare()
+                _mediaController.value?.playWhenReady = true
             }
         }
     }
 
 
     private fun playOrPause() {
-        if (mediaController.value!!.isPlaying) {
-            mediaController.value!!.pause()
+        if (_mediaController.value!!.isPlaying) {
+            _mediaController.value!!.pause()
         } else {
-            mediaController.value!!.play()
+            _mediaController.value!!.play()
         }
     }
 
@@ -108,35 +110,6 @@ class PlayerHandler @Inject constructor(
     }
 
 }
-
-@OptIn(UnstableApi::class)
-fun MediaItem.asMusicDto(): MusicDto {
-    return MusicDto(
-        mediaId.toLong(),
-        mediaMetadata.displayTitle.toString(),
-        mediaMetadata.artist.toString(),
-        mediaMetadata.durationMs ?: 0L,
-        mediaMetadata.artworkUri.toString(),
-        localConfiguration?.uri.toString()
-    )
-}
-
-@OptIn(UnstableApi::class)
-fun MusicDto.asMediaItem(): MediaItem {
-    return MediaItem.Builder()
-        .setUri(this.filepath)
-        .setMediaId(this.id.toString())
-        .setMediaMetadata(
-            MediaMetadata.Builder()
-                .setArtist(this.artist)
-                .setDisplayTitle(this.title)
-                .setDurationMs(this.duration)
-                .setArtworkUri(Uri.parse(this.image))
-                .build()
-        )
-        .build()
-}
-
 
 
 
