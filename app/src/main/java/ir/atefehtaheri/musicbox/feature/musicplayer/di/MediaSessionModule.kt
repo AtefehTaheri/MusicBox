@@ -3,7 +3,6 @@ package ir.atefehtaheri.musicbox.feature.musicplayer.di
 import android.content.Context
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

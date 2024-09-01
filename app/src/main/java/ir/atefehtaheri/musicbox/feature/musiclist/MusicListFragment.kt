@@ -13,15 +13,10 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -35,11 +30,8 @@ import ir.atefehtaheri.musicbox.core.common.requestIntentSenderCallback
 import ir.atefehtaheri.musicbox.core.common.requestMultiPermissionCallback
 import ir.atefehtaheri.musicbox.data.musiclist.local.models.MusicDto
 import ir.atefehtaheri.musicbox.databinding.FragmentMusiclistBinding
-import ir.atefehtaheri.musicbox.feature.musiclist.uistate.MusicListUiState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -196,9 +188,5 @@ class MusicListFragment() : Fragment() {
             Toast.LENGTH_SHORT
         ).show()
     }
-//
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        mediaController?.release()
-//    }
+
 }

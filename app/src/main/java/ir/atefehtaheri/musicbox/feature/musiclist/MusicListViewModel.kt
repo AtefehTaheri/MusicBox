@@ -97,10 +97,11 @@ class MusicListViewModel @Inject constructor(
     }
 
 
-//    override fun onCleared() {
-//        super.onCleared()
-//        mediaController.value?.release()
-//    }
+    override fun onCleared() {
+        super.onCleared()
+//        mediaController?.value!!.release()
+        playerHandler.onDestroy()
+    }
 
 }
 

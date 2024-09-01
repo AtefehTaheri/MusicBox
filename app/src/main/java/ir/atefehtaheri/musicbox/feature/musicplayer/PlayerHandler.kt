@@ -43,7 +43,6 @@ class PlayerHandler @Inject constructor(
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 mediaItem?.let {
                     _currentMusic.update {
-
                         mediaItem.asMusicDto()
                     }
                 }
@@ -86,6 +85,7 @@ class PlayerHandler @Inject constructor(
             mediaController.value?.currentMediaItemIndex -> {
                 playOrPause()
             }
+
             else -> {
                 mediaController.value?.seekToDefaultPosition(index)
                 mediaController.value?.prepare()
@@ -94,9 +94,6 @@ class PlayerHandler @Inject constructor(
         }
     }
 
-    fun onDeleteItemClick(positionItem: Int) {
-        mediaController.value?.removeMediaItem(positionItem)
-    }
 
     private fun playOrPause() {
         if (mediaController.value!!.isPlaying) {
@@ -104,6 +101,10 @@ class PlayerHandler @Inject constructor(
         } else {
             mediaController.value!!.play()
         }
+    }
+
+    fun onDestroy() {
+        MediaController.releaseFuture(mediaControllerFuture)
     }
 
 }

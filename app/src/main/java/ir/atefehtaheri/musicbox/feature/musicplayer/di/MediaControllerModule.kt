@@ -18,7 +18,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object MediaControllerModule {
 
-    @Singleton
+//    @Singleton
     @Provides
     fun getMediaControllerModule(
         @ApplicationContext context: Context,

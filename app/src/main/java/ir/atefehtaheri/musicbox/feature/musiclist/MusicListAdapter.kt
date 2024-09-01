@@ -50,7 +50,6 @@ class MusicListAdapter(
             playBtn.setOnClickListener {
                 onPlayClick(absoluteAdapterPosition)
             }
-
         }
     }
 
