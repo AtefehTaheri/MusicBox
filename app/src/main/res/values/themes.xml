@@ -1,4 +1,5 @@
 <resources>
+
     <style name="Theme.MusicBox" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/md_theme_primary</item>
         <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
@@ -47,6 +48,7 @@
         <item name="colorSurfaceContainerHigh">@color/md_theme_surfaceContainerHigh</item>
         <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest</item>
     </style>
+
     <style name="TitleMedium">
         <item name="android:fontFamily">@font/aliceregular</item>
         <item name="android:textStyle">bold</item>
@@ -54,6 +56,7 @@
         <item name="android:lineHeight">24sp</item>
         <item name="android:letterSpacing">0.2</item>
     </style>
+
     <style name="BodyMedium">
         <item name="android:fontFamily">@font/abhayalibremedium</item>
         <item name="android:textStyle">normal</item>
@@ -61,5 +64,11 @@
         <item name="android:lineHeight">20sp</item>
         <item name="android:letterSpacing">0.2</item>
     </style>
+
+    <style name="ShapeAppearance_circular" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
 
 </resources>

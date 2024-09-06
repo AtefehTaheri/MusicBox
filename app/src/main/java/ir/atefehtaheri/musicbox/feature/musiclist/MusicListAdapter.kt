@@ -11,30 +11,32 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import ir.atefehtaheri.musicbox.R
 import ir.atefehtaheri.musicbox.data.musiclist.local.models.MusicDto
+import ir.atefehtaheri.musicbox.data.musiclist.local.models.durationToMinutes
 import ir.atefehtaheri.musicbox.databinding.MusicItemBinding
 
 class MusicListAdapter(
-    private val onPlayClick:()->Unit,
-    private val onDeleteClick:(Long)->Unit
-) :ListAdapter<MusicDto, MusicListAdapter.MusicListViewHolder>(MusicDiffCallback()) {
+    private val onPlayClick: (Int) -> Unit,
+    private val onDeleteClick: (Long) -> Unit
+) : ListAdapter<MusicDto, MusicListAdapter.MusicListViewHolder>(MusicDiffCallback()) {
 
 
     class MusicListViewHolder(
         private val binding: MusicItemBinding,
-        private val onPlayClick:()->Unit,
-        private val onDeleteClick:(Long)->Unit
-    ) :RecyclerView.ViewHolder(binding.root) {
+        private val onPlayClick: (Int) -> Unit,
+        private val onDeleteClick: (Long) -> Unit
+    ) : RecyclerView.ViewHolder(binding.root) {
 
         private val title = binding.title
         private val artist = binding.artist
         private val duration = binding.duration
         private val imageView = binding.imageView
         private val moreOptionBtn = binding.moreOption
+        private val playBtn = binding.play
 
         fun bind(musicDto: MusicDto) {
             title.text = musicDto.title
             artist.text = musicDto.artist
-            duration.text = durationToMinutes(musicDto.duration)
+            duration.text = musicDto.durationToMinutes()
             val imageUri: Uri = Uri.parse(musicDto.image)
 
             imageView.load(imageUri) {
@@ -43,16 +45,19 @@ class MusicListAdapter(
                 error(R.drawable.placeholder)
             }
             moreOptionBtn.setOnClickListener { view ->
-                showPopupMenu(view, musicDto,onPlayClick,onDeleteClick)
+                showPopupMenu(view, absoluteAdapterPosition, musicDto, onPlayClick, onDeleteClick)
             }
-
+            playBtn.setOnClickListener {
+                onPlayClick(absoluteAdapterPosition)
+            }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = MusicListViewHolder(
         MusicItemBinding.inflate(LayoutInflater.from(parent.context), parent, false),
         onPlayClick,
-        onDeleteClick)
+        onDeleteClick
+    )
 
     override fun onBindViewHolder(holder: MusicListViewHolder, position: Int) {
         holder.bind(getItem(position))
@@ -69,19 +74,14 @@ class MusicDiffCallback : DiffUtil.ItemCallback<MusicDto>() {
     }
 }
 
-private fun durationToMinutes(duration: Long): String {
-    val totalSeconds = duration / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return String.format("%02d:%02d", minutes, seconds)
-}
-
 
 private fun showPopupMenu(
     view: View,
+    positionItem: Int,
     musicDto: MusicDto,
-    onPlayClick:()->Unit,
-    onDeleteClick:(Long)->Unit) {
+    onPlayClick: (Int) -> Unit,
+    onDeleteClick: (Long) -> Unit
+) {
 
     val popupMenu = PopupMenu(view.context, view)
     popupMenu.inflate(R.menu.menu_item)
@@ -89,9 +89,10 @@ private fun showPopupMenu(
     popupMenu.setOnMenuItemClickListener { menuItem ->
         when (menuItem.itemId) {
             R.id.play -> {
-                onPlayClick()
+                onPlayClick(positionItem)
                 true
             }
+
             R.id.delete -> {
                 onDeleteClick(musicDto.id)
                 true

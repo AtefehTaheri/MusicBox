@@ -59,6 +59,8 @@ dependencies {
     kapt(libs.hilt.compiler)
 
     implementation(libs.coil)
-    
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
+    implementation(libs.media3.session)
 
 }

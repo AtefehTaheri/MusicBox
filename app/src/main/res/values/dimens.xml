@@ -2,5 +2,16 @@
 <resources>
     <dimen name="card_padding" >16dp</dimen>
     <dimen name="image_margin_end">20dp</dimen>
+    <dimen name="card_corner_radius_20dp">20dp</dimen>
+    <dimen name="card_corner_radius_50dp">50dp</dimen>
+    <dimen name="text_padding">50dp</dimen>
+    <dimen name="card_elevation">8dp</dimen>
+    <dimen name="padding_7dp">7dp</dimen>
+    <dimen name="padding_10dp">10dp</dimen>
+    <dimen name="padding_20dp">20dp</dimen>
+    <dimen name="padding_50dp">50dp</dimen>
+    <dimen name="icon_size">30dp</dimen>
+    <dimen name="cover_music">50dp</dimen>
+    <dimen name="stroke_width">2dp</dimen>
 
 </resources>

@@ -6,14 +6,6 @@
     android:background="@color/md_theme_surfaceContainerHigh">
 
 
-    <include
-        android:id="@+id/header"
-        layout="@layout/header_content"
-        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -23,7 +15,7 @@
         app:layout_constraintBottom_toTopOf="@+id/player_cardview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/header" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -103,7 +95,6 @@
                 android:paddingVertical="@dimen/padding_7dp"
                 android:maxLines="1"
                 android:text=""
-                android:textColor="@color/md_theme_scrim"
                 app:layout_constraintBottom_toTopOf="@+id/media_controls"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/media_controls"

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="7dp">
+    android:layout_margin="@dimen/padding_7dp">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/CardView"
@@ -12,8 +12,8 @@
         android:layout_height="0dp"
         android:outlineSpotShadowColor="@android:color/transparent"
         app:cardBackgroundColor="@color/design_default_color_on_primary"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="8dp"
+        app:cardCornerRadius="@dimen/card_corner_radius_20dp"
+        app:cardElevation="@dimen/card_elevation"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="W,1:4"
         app:layout_constraintEnd_toEndOf="parent"
@@ -49,7 +49,7 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="Hello"
+                    android:text=""
                     android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
                     android:textColor="@color/md_theme_scrim"
                     android:textStyle="bold"
@@ -62,7 +62,7 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="Hello"
+                    android:text=""
                     android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
                     android:textColor="@color/md_theme_outline"
                     app:layout_constraintStart_toStartOf="parent"
@@ -74,7 +74,7 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="Hello"
+                    android:text=""
                     android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
                     android:textColor="@color/md_theme_secondary"
                     app:layout_constraintStart_toStartOf="parent"

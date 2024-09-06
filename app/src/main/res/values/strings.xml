@@ -10,7 +10,6 @@
     <string name="permissionsDenied">This app needs access to your music files.Please grant the necessary permissions.</string>
     <string name="intentSenderDenied">Unable to delete the file. Please grant the required permission</string>
     <string name="music_notfound">Music file not found</string>
-
-
+    <string name="albumart_uri">content://media/external/audio/albumart</string>
 
 </resources>
